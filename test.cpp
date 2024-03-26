@@ -1,4 +1,3 @@
-#define NDEBUG
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -7,6 +6,7 @@
 
 #define str(x) #x
 
+// #define NDEBUG
 void test_darray(){
   char *array;
   DARRAY_MAKE(char, array);
@@ -51,6 +51,5 @@ asdas\n\
 
 
 int main() {
-  assert(0 || !"Test failed");
   return 0;
 }

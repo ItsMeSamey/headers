@@ -15,7 +15,7 @@ extern "C" {
 #include "dynamic_array.h"
 
 /*
- * creates a DARRAY that user has to free
+ * WARN: use `DARRAY_FREE(array);`
 */
 #define MULTI_FILE_MAKE(array) DARRAY_MAKE(struct __pointer_pair, array);\
 
@@ -44,13 +44,13 @@ extern "C" {
 }
 
 
-/* this function uses malloc to allocate memory for the array
- * use `__MULTI_FILE_READ_FREE(array);`
+/*
+ * WARN: use `MULTI_FILE_READ_FREE(array);`
+ * WARN: assumption `fseek(file, 0, SEEK_SET);` or equivalant
 */
 #define MULTI_FILE_READ(array, file){\
   assert(array != NULL || !"multi_file_read: invalid array");\
   assert(file != NULL || !"multi_file_read: invalid file");\
-  fseek(file, 0, SEEK_SET);\
   size_t len;\
   fread(&len, sizeof(size_t), 1, file);\
   assert(len >= sizeof(uint64_t) || !"multi_file_read: invalid length");\
@@ -78,24 +78,29 @@ extern "C" {
 }
 
 /*
- * this function uses malloc to allocate memory for the array.b
- * use `free(array.b);`
+ * NOTE: Does NOT mofify stream position
+ * WARN: use `free(array.b);`
 */
 #define MULTI_FILE_GET(pair, file, index){\
   assert(file != NULL || !"multi_file_read: invalid file");\
   size_t len, offset[2];\
-  fseek(file, 0, SEEK_SET);\
+  size_t position = ftell(file);\
   fread(&len, sizeof(size_t), 1, file);\
   assert(len >= sizeof(uint64_t) || !"multi_file_read: invalid length");\
-  fseek(file, index*sizeof(size_t), SEEK_SET);\
-  fread(&offset, sizeof(size_t), 2, file);\
-  assert(offset[1] >= offset[0] || !"multi_file_read: invalid offset / invalid file");\
-  offset[1] -= offset[0];\
+  if (index == 0) {\
+    fread(offset+1, sizeof(size_t), 1, file);\
+  } else {\
+    fseek(file, (index-1)*sizeof(size_t), SEEK_CUR);\
+    fread(&offset, sizeof(size_t), 2, file);\
+    assert(offset[1] >= offset[0] || !"multi_file_read: invalid offset / invalid file");\
+    offset[1] -= offset[0];\
+  }\
+  fseek(file, position + (len+1)*sizeof(size_t) + offset[0], SEEK_SET);\
   uint8_t *buff = (uint8_t *)malloc(sizeof(uint8_t)*offset[1]);\
   pair.a = (void *)offset[1];\
   pair.b = buff;\
-  fseek(file, (len+1)*sizeof(size_t) + offset[0], SEEK_SET);\
   fread(pair.b, sizeof(uint8_t), offset[1], file);\
+  fseek(file, position, SEEK_SET);\
 }
 
 #ifdef __cplusplus // if c++
