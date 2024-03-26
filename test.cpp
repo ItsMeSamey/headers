@@ -1,63 +1,54 @@
-#include <cstdlib>
-#include <curses.h>
-#include <menu.h>
+#include <assert.h>
+#include <stdio.h>
+#include <string.h>
+#include "dynamic_array.h"
+#include "config_parser.h"
 
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
-#define CTRLD 4
+#define str(x) #x
 
-char *choices[] = {
-    (char *)"Choice 1", (char *)"Choice 2", (char *)"Choice 3",
-    (char *)"Choice 4", (char *)"Exit",
-};
+void test_darray(){
+  char *array;
+  DARRAY_MAKE(char, array);
+  size_t* size = DARRAY_SIZE(array);
+  assert(*size == 0 || !"Size must be 0 initially");
+  DARRAY_ADD(char, array, 'a');
+  assert(array[0] == 'a' || !"First element must be 'a'");
+  DARRAY_ADD(char, array, 'b');
+  assert(array[0] == 'a' || !"First element must be 'a'");
+  assert(array[1] == 'b' || !"Second element must be 'b'");
+}
+
+void test_variable_saver(){
+  char s[] = "\n\
+a = b\n\
+c = d\n\
+# sda\n\
+\n\
+#asd\n\
+\n\
+\n\
+ = c\n\
+asdas\n\
+\n\
+#saa = asd\n\
+\n\
+  ";
+  FILE *file = fmemopen((void *)s, sizeof(s), "r");
+  auto i = __load_variables(file);
+  size_t* size = DARRAY_SIZE(i);
+  for (size_t j = 0; j < *size; j++){
+    printf("|%s|%s|\n", i[j].name, i[j].value);
+  }
+  assert(*size == 4 || !"Size must be 4");
+  assert(strcmp(i[0].name, "a") == 0 || !"First name must be 'a'");
+  assert(strcmp(i[0].value, "b") == 0 || !"First value must be 'b'");
+  assert(strcmp(i[1].name, "c") == 0 || !"Second name must be 'c'");
+  assert(strcmp(i[1].value, "d") == 0 || !"Second value must be 'd'");
+  assert(strcmp(i[2].value, "c") == 0 || !"Third value must be 'c'");
+  assert(strcmp(i[3].name, "asdas") == 0 || !"Fourth name must be 'asdas'");
+}
 
 int main() {
-  ITEM **my_items;
-  int c;
-  MENU *my_menu;
-  int n_choices, i;
-  ITEM *cur_item;
-
-  initscr();
-  cbreak();
-  noecho();
-  keypad(stdscr, TRUE);
-
-  n_choices = ARRAY_SIZE(choices);
-  my_items = (ITEM **)malloc((n_choices + 1) * sizeof(ITEM *));
-
-  for (i = 0; i < n_choices; ++i)
-    my_items[i] = new_item(choices[i], choices[i]);
-  my_items[n_choices] = (ITEM *)NULL;
-
-  my_menu = new_menu((ITEM **)my_items);
-
-  int _y = 2, _x = 3;
-  menu_format(my_menu, &_y, &_x);
-  set_menu_opts(my_menu, O_MOUSE_MENU);
-  //   set_menu_opts( my_menu, O_ROWMAJOR | O_MOUSE_MENU);
-  mvprintw(LINES - 2, 0, "F1 to Exit");
-  post_menu(my_menu);
-  refresh();
-
-  while ((c = getch()) != KEY_F(1)) {
-    switch (c) {
-    case KEY_DOWN:
-      menu_driver(my_menu, REQ_DOWN_ITEM);
-      break;
-    case KEY_UP:
-      menu_driver(my_menu, REQ_UP_ITEM);
-      break;
-    case KEY_LEFT:
-      menu_driver(my_menu, REQ_LEFT_ITEM);
-      break;
-    case KEY_RIGHT:
-      menu_driver(my_menu, REQ_RIGHT_ITEM);
-      break;
-    }
-  }
-
-  free_item(my_items[0]);
-  free_item(my_items[1]);
-  free_menu(my_menu);
-  endwin();
+  test_variable_saver();
+  return 0;
 }

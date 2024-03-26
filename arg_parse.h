@@ -1,31 +1,17 @@
 #pragma once
 
-#ifndef PARSABLE_ARGUMENTS_NAME
-#define PARSABLE_ARGUMENTS_NAME parsable_arguments
-#endif
-#ifndef PARSE_ARGUMENTS_NAME
-#define PARSE_ARGUMENTS_NAME parse_arguments
-#endif
+#ifdef __cplusplus // if c++
+extern "C" {
+#endif // end if c++
 
-#ifndef __cplusplus // if !c++
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
-#endif // end if !c++
-
-#ifdef __cplusplus // if c++
-#include <cstdio>
-
-#include <cstddef>
-#include <cstdlib>
-#include <cstring>
-namespace arg_parser {
-#endif // end if c++
-
+#include "dynamic_array.h"
 //default_callback_manager
 
-inline void PARSABLE_ARGUMENTS_NAME(char * arg_name, void * callback_or_arg_value, size_t argc = 0, size_t* start = NULL){
- //argument_start, argument_end, start, argc;
+inline void __parsable_arguments(char * arg_name, void * callback_or_arg_value, size_t argc = 0, size_t* start = NULL){
+  //argument_start, argument_end, start, argc;
   static void** args = (void **)malloc(sizeof(void *)*1024*4);
   static size_t total = 1024;
   static size_t filled = 0;
@@ -73,28 +59,32 @@ inline void PARSABLE_ARGUMENTS_NAME(char * arg_name, void * callback_or_arg_valu
   }
 }
 
-inline void PARSE_ARGUMENTS_NAME(const size_t argc, char** argv) {
-  char *argument_start = *argv, *argument_end;
-  size_t start = 0;
-  while (start < argc) {
-    argument_start = argv[start++];
-    argument_end = argument_start;
-    if (argument_start[0] == '-') {
-      for (; *argument_end != '\0' && *argument_end != '='; argument_end++);// argument can be like ['--foo=bar'] or ['--foo', 'bar']
-      if (argument_start[1] == '-') {
-        PARSABLE_ARGUMENTS_NAME(argument_start+2, (*argument_end? (*argument_end ='\0',argument_end+1): start<argc?argv[start++]:NULL), argc, &start);
-      }else {
-        char next = 0[++argument_start];
-        for(; argument_start < argument_end; ++argument_start){
-          char *arg_val = (argument_start[1]=='='? (argument_start[1]='\0',argument_start+2): (!argument_start[1]&&start<argc)?argv[start++]:NULL);
-          argument_start[0] = next;next = argument_start[1];argument_start[1] = '\0';
-          PARSABLE_ARGUMENTS_NAME(argument_start, arg_val, argc, &start);
-        }
+inline __DARRAY(char**) __parse_arguments(const size_t argc, char** argv) {
+  char *cur;
+  char **array;
+  DARRAY_MAKE(char *, array);
+  DARRAY_RESIZE(cahr*, array, argc*2);
+  size_t *size = DARRAY_SIZE(array);
+  size_t pos = 0;
+  while (pos < argc) {
+    cur = argv[pos];
+    if (cur[0] == '-') {
+      while (*cur != '=' && *cur != '\0') cur++;
+      if (cur[0] == '=') {
+        char *prior = cur;
+        while (*(prior-1) == ' ' || *(prior-1) == '\t' || *(prior-1) == '\n') prior--;
+        *prior = '\0';
+        cur++;
+        while (*cur == ' ' || *cur == '\t' || *cur == '\n') cur++;
+        array[*size] = argv[pos];
+        (*size)++;
       }
-    }else {
-      PARSABLE_ARGUMENTS_NAME(NULL, argument_start, argc, &start);
     }
+    array[*size] = argv[pos];
+    (*size)++;
+    pos++;
   }
+  return array;
 }
 
 
