@@ -1,3 +1,4 @@
+#define NDEBUG
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -37,18 +38,19 @@ asdas\n\
   auto i = __load_variables(file);
   size_t* size = DARRAY_SIZE(i);
   for (size_t j = 0; j < *size; j++){
-    printf("|%s|%s|\n", i[j].name, i[j].value);
+    printf("|%s|%s|\n", (char *)i[j].a, (char *)(i[j].b));
   }
   assert(*size == 4 || !"Size must be 4");
-  assert(strcmp(i[0].name, "a") == 0 || !"First name must be 'a'");
-  assert(strcmp(i[0].value, "b") == 0 || !"First value must be 'b'");
-  assert(strcmp(i[1].name, "c") == 0 || !"Second name must be 'c'");
-  assert(strcmp(i[1].value, "d") == 0 || !"Second value must be 'd'");
-  assert(strcmp(i[2].value, "c") == 0 || !"Third value must be 'c'");
-  assert(strcmp(i[3].name, "asdas") == 0 || !"Fourth name must be 'asdas'");
+  assert(strcmp((char *)i[0].a, "a") == 0 || !"First name must be 'a'");
+  assert(strcmp((char *)i[0].b, "b") == 0 || !"First value must be 'b'");
+  assert(strcmp((char *)i[1].a, "c") == 0 || !"Second name must be 'c'");
+  assert(strcmp((char *)i[1].b, "d") == 0 || !"Second value must be 'd'");
+  assert(strcmp((char *)i[2].b, "c") == 0 || !"Third value must be 'c'");
+  assert(strcmp((char *)i[3].a, "asdas") == 0 || !"Fourth name must be 'asdas'");
 }
 
+
 int main() {
-  test_variable_saver();
+  assert(0 || !"Test failed");
   return 0;
 }

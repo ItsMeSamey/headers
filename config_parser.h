@@ -11,11 +11,11 @@ extern "C" {
 #include "dynamic_array.h"
 
 
-void __save_variables_to_file(FILE *options_file, struct __pointer_pair *to_be_saved, size_t length){
-  assert(options_file != NULL || !"File must not be NULL");
-  for (size_t i = 0; i < length; i++){
-    fprintf(options_file, "%s = %s\n", (char *)to_be_saved[i].a, (char *)to_be_saved[0].b);
-  }
+#define __SAVE_VARIABLES_TO_FILE(to_be_saved, options_file, length){\
+  assert(options_file != NULL || !"File must not be NULL");\
+  for (size_t i = 0; i < length; i++){\
+    fprintf(options_file, "%s = %s\n", (char *)to_be_saved[i].a, (char *)to_be_saved[0].b);\
+  }\
 }
 
 __DARRAY(struct __pointer_pair*) __load_variables(FILE *options_file){
