@@ -13,17 +13,17 @@ extern "C" {
 
 #define CONFIG_PARSER_SAVE(to_be_saved, options_file, length){\
   assert(options_file != NULL || !"File must not be NULL");\
-  for (size_t i = 0; i < length; i++){\
+  for (uint32_t i = 0; i < length; i++){\
     fprintf(options_file, "%s = %s\n", (char *)to_be_saved[i].a, (char *)to_be_saved[0].b);\
   }\
 }
 
-inline __DARRAY(struct __pointer_pair*) __load_variables(FILE *options_file){
+inline DARRAY(struct _pointer_pair*) __load_variables(FILE *options_file){
   assert(options_file != NULL || !"File must not be NULL");
-  size_t length_of_file;
-  struct __pointer_pair *array_to_return = NULL;
-  DARRAY_MAKE(struct __pointer_pair, array_to_return);
-  DARRAY_RESIZE(struct __pointer_pair, array_to_return, 1024-1);
+  uint32_t length_of_file;
+  struct _pointer_pair *array_to_return = NULL;
+  DARRAY_MAKE(array_to_return);
+  DARRAY_RESIZE(array_to_return, 1024-1);
   fseek(options_file, 0, SEEK_END);
   length_of_file = ftell(options_file);
   fseek(options_file, 0, SEEK_SET);
@@ -56,8 +56,8 @@ inline __DARRAY(struct __pointer_pair*) __load_variables(FILE *options_file){
     while (*pos != '\n' && pos < end) pos++;
     *pos = '\0'; pos++;
     add:;
-    struct __pointer_pair v = {arg, val};
-    DARRAY_ADD(struct __pointer_pair, array_to_return, v);
+    struct _pointer_pair v = {arg, val};
+    DARRAY_ADD(array_to_return, v);
   }
   return array_to_return;
 }

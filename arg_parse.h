@@ -4,6 +4,35 @@
 extern "C" {
 #endif // end if c++
 
+#if !defined(UNDEFINE_ARG_PARSE) // if c++
+#define VOID 0
+#define INT 1
+
+#define ARG_NEXT() ;
+
+#define ARG_ADD(argname, var, consume)
+
+#else
+#undef UNDEFINE_ARG_PARSE
+#undef VOID
+#undef INT
+#undef STRING
+#undef ADD_ARG
+#endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>

@@ -2,54 +2,46 @@
 extern "C" {
 #endif // end if c++
 
-#ifndef UNDEFINE_DYNAMIC_ARRAY
-#ifndef DYNAMIC_ARRAY_HEADER
-#define DYNAMIC_ARRAY_HEADER
-
+#if !defined(UNDEFINE_DYNAMIC_ARRAY)
 #include <stdlib.h>
+#include <stddef.h>
+#include <stdint.h>
 
-#define __DARRAY(array) array // does nothing; just for signify return type
+#define DARRAY(array) array // does nothing; just for signify return type
 
-#define DARRAY_MAKE(type, array) { \
-  size_t*__name = (size_t *)malloc(3*sizeof(type) + 2*sizeof(size_t)); \
-  __name[0] = 0; \
-  __name[1] = 3; \
-  array = (type *)(__name+2); \
+#define DARRAY_MAKE(array) {\
+  array = (typeof(array))((uint32_t *)malloc(2*sizeof(uint32_t) + 3*sizeof(typeof(*array)))+2);\
+  0[DARRAY_SIZE(array)] = 0;\
+  1[DARRAY_SIZE(array)] = 0;\
 }
 
-#define DARRAY_SIZE(array) ((size_t *)array-2)
+#define DARRAY_SIZE(array) ((uint32_t *)array-2)
 
-#define DARRAY_ADD(type, array, value) { \
-  size_t* __size = DARRAY_SIZE(array); \
-  if (__size[0] == __size[1]) { \
-    __size[1] = (__size[1]<<1) + 1; \
-    array = (type *)((size_t *)realloc((void *)__size, __size[1]*sizeof(type) + 2*sizeof(size_t)) + 2); \
-  } \
-  array[__size[0]++] = value; \
+#define DARRAY_ADD(array, value) {\
+  if (0[DARRAY_SIZE(array)] == 1[DARRAY_SIZE(array)]) {\
+    1[DARRAY_SIZE(array)] = (1[DARRAY_SIZE(array)]<<1) | 1;\
+    array = (typeof(array))((uint32_t *)realloc((void *)DARRAY_SIZE(array), 1[DARRAY_SIZE(array)]*sizeof(typeof(*array)) + 2*sizeof(uint32_t)) + 2);\
+  }\
+  array[0[DARRAY_SIZE(array)]++] = value;\
 }
 
-#define DARRAY_RESIZE(type, array, capacity) { \
-  size_t* __size = DARRAY_SIZE(array); \
-  __size[0] = __size[0] > capacity ? capacity : __size[0]; \
-  __size[1] = capacity; \
+#define DARRAY_RESIZE(array, capacity) {\
+  0[DARRAY_SIZE(array)] = 0[DARRAY_SIZE(array)] > capacity ? capacity : 0[DARRAY_SIZE(array)];\
+  1[DARRAY_SIZE(array)] = capacity;\
 }
 
 #define DARRAY_FREE(array) free((void *)DARRAY_SIZE(array))
 
-
-#endif // end if DYNAMIC_ARRAY_H
-#endif // end if UNDEFINE_DYNAMIC_ARRAY
-
-#ifdef UNDEFINE_DYNAMIC_ARRAY
+#else
 #undef UNDEFINE_DYNAMIC_ARRAY
 #undef DYNAMIC_ARRAY_HEADER
-#undef __DARRAY
+#undef DARRAY
 #undef DARRAY_MAKE
 #undef DARRAY_SIZE
 #undef DARRAY_ADD
 #undef DARRAY_RESIZE
 #undef DARRAY_FREE
-#endif 
+#endif // end if UNDEFINE_DYNAMIC_ARRAY
 
 #ifdef __cplusplus // if c++
 }; // namespace arg_parser
