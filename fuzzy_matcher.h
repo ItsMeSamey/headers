@@ -1,8 +1,8 @@
 #pragma once
 
-#ifdef __cplusplus // if c++
+#ifdef __cplusplus
 extern "C" {
-#endif // end if c++
+#endif
 
 #include <stdio.h>
 #include <string.h>
@@ -74,7 +74,7 @@ char **levenshtein_distance_sort(char *word, char *string_of_words, size_t optio
   return array_to_be_sorted;
 }
 
-#ifdef __cplusplus // if c++
-}; // namespace fuzzy_matcher
-#endif // end if c++
+#ifdef __cplusplus
+};
+#endif
 

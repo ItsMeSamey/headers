@@ -1,10 +1,10 @@
 #pragma once
 
-#ifdef __cplusplus // if c++
+#ifdef __cplusplus
 extern "C" {
-#endif // end if c++
+#endif
 
-#if !defined(UNDEFINE_ARG_PARSE) // if c++
+#if !defined(UNDEFINE_ARG_PARSE)
 #define VOID 0
 #define INT 1
 
@@ -19,15 +19,6 @@ extern "C" {
 #undef STRING
 #undef ADD_ARG
 #endif
-
-
-
-
-
-
-
-
-
 
 
 
@@ -66,7 +57,7 @@ inline __DARRAY(char**) __parse_arguments(const size_t argc, char** argv) {
   return array;
 }
 
-#ifdef __cplusplus // if c++
-}; // namespace arg_parser
-#endif // end if c++
+#ifdef __cplusplus
+};
+#endif
 

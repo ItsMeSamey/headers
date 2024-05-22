@@ -38,7 +38,7 @@ asdas\n\
 \n\
   ";
   FILE *file = fmemopen((void *)s, sizeof(s), "r");
-  struct _pointer_pair* i = __load_variables(file);
+  struct _pointer_pair* i = _load_variables(file);
   uint32_t* size = DARRAY_SIZE(i);
   for (size_t j = 0; j < *size; j++){
     printf("|%s|%s|\n", (char *)i[j].a, (char *)(i[j].b));

@@ -1,11 +1,11 @@
 #pragma once
 
-#ifdef __cplusplus // if c++
+#ifdef __cplusplus
 extern "C" {
-#endif // end if c++
+#endif
 
 struct _pointer_pair{void *a, *b;};
 
-#ifdef __cplusplus // if c++
+#ifdef __cplusplus
 }
-#endif // end if c++
+#endif

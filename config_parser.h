@@ -1,30 +1,35 @@
 #pragma once
 
-#ifdef __cplusplus // if c++
+#ifdef __cplusplus
 extern "C" {
-#endif // end if c++
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include "structures.h"
-#include "dynamic_array.h"
+#include "hash_map.h"
 
 
 #define CONFIG_PARSER_SAVE(to_be_saved, options_file, length){\
   assert(options_file != NULL || !"File must not be NULL");\
-  for (uint32_t i = 0; i < length; i++){\
-    fprintf(options_file, "%s = %s\n", (char *)to_be_saved[i].a, (char *)to_be_saved[0].b);\
+  for (uint32_t _internal_variable_i = 0; _internal_variable_i < length; _internal_variable_i++){\
+    if (to_be_saved[_internal_variable_i].a == NULL) fprintf(options_file, "\n");\
+    else if (to_be_saved[_internal_variable_i].b == NULL) fprintf(options_file, "%s\n", (char *)to_be_saved[_internal_variable_i].a);\
+    else fprintf(options_file, "%s = %s\n", (char *)to_be_saved[_internal_variable_i].a, (char *)to_be_saved[_internal_variable_i].b);\
   }\
 }
 
-inline DARRAY(struct _pointer_pair*) __load_variables(FILE *options_file){
+#define CONFIG_PARSER_CONSUME_MAKE(options_struct, function_name, option_list...) \
+options_struct function_name(DARRAY(struct _pointer_pair*) options){\
+}
+
+inline HMAP(struct _pointer_pair**) CONFIG_PARSER_PARSE(FILE *options_file){
   assert(options_file != NULL || !"File must not be NULL");
-  uint32_t length_of_file;
-  struct _pointer_pair *array_to_return = NULL;
-  DARRAY_MAKE(array_to_return);
-  DARRAY_RESIZE(array_to_return, 1024-1);
+  struct _pointer_pair **array_to_return;
+  HMAP_MAKE(array_to_return, 1024);
   fseek(options_file, 0, SEEK_END);
+  uint32_t length_of_file;
   length_of_file = ftell(options_file);
   fseek(options_file, 0, SEEK_SET);
   char *buff = (char*)malloc(sizeof(char) * length_of_file);
@@ -33,7 +38,7 @@ inline DARRAY(struct _pointer_pair*) __load_variables(FILE *options_file){
 
   while (pos < end){
     char *arg, *val;
-    while ((*pos == ' ' || *pos == '\n' || *pos == '\t' || *pos == '\0') && pos < end) pos++;
+    while ((*pos == ' ' || *pos == '\n' || *pos == '\t' || *pos == '\r') && pos < end) pos++;
     if (*pos == '#'){
       pos++;
       while (*pos != '\n' && pos < end) pos++;
@@ -56,13 +61,12 @@ inline DARRAY(struct _pointer_pair*) __load_variables(FILE *options_file){
     while (*pos != '\n' && pos < end) pos++;
     *pos = '\0'; pos++;
     add:;
-    struct _pointer_pair v = {arg, val};
-    DARRAY_ADD(array_to_return, v);
+    HMAP_ADD(array_to_return, 0, arg, val);
   }
   return array_to_return;
 }
 
-#ifdef __cplusplus // if c++
-}; // namespace arge parser
-#endif // end if c++
+#ifdef __cplusplus
+};
+#endif
 

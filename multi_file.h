@@ -1,8 +1,8 @@
 #pragma once
 
-#ifdef __cplusplus // if c++
+#ifdef __cplusplus
 extern "C" {
-#endif // end if c++
+#endif
 
 #include <stdio.h>
 #include <assert.h>
@@ -94,6 +94,6 @@ extern "C" {
   fseek(file, _internal_variable_position, SEEK_SET);\
 }
 
-#ifdef __cplusplus // if c++
+#ifdef __cplusplus
 }
-#endif // end if c++
+#endif
