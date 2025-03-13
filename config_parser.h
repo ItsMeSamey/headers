@@ -8,8 +8,8 @@ extern "C" {
 #include <stdlib.h>
 #include <assert.h>
 #include "structures.h"
+#include "file_ops.h"
 #include "hash_map.h"
-
 
 #define CONFIG_PARSER_SAVE(to_be_saved, options_file, length){\
   assert(options_file != NULL || !"File must not be NULL");\
@@ -20,50 +20,36 @@ extern "C" {
   }\
 }
 
-#define CONFIG_PARSER_CONSUME_MAKE(options_struct, function_name, option_list...) \
-options_struct function_name(DARRAY(struct _pointer_pair*) options){\
-}
-
-inline HMAP(struct _pointer_pair**) CONFIG_PARSER_PARSE(FILE *options_file){
-  assert(options_file != NULL || !"File must not be NULL");
-  struct _pointer_pair **array_to_return;
-  HMAP_MAKE(array_to_return, 1024);
-  fseek(options_file, 0, SEEK_END);
-  uint32_t length_of_file;
-  length_of_file = ftell(options_file);
-  fseek(options_file, 0, SEEK_SET);
-  char *buff = (char*)malloc(sizeof(char) * length_of_file);
-  fread(buff, 1, length_of_file, options_file);
-  char *pos = buff, *end = buff + length_of_file;
-
-  while (pos < end){
-    char *arg, *val;
-    while ((*pos == ' ' || *pos == '\n' || *pos == '\t' || *pos == '\r') && pos < end) pos++;
-    if (*pos == '#'){
-      pos++;
-      while (*pos != '\n' && pos < end) pos++;
-      continue;
-    }
-    if (pos == end) break;
-    arg = pos;
-    while (*pos != '=' && *pos != '\n' && pos < end) pos++;
-    if (pos == end || *pos == '\n') {
-      *pos = '\0'; pos++;
-      val = NULL;
-      goto add;
-    }
-    val = pos+1;
-    while (*(pos-1) == ' ' && pos > arg) pos--;
-    if (pos == arg) arg = NULL;
-    else *pos = '\0';
-    while (*val == ' ' || *val == '\t' && val < end) val++;
-    pos = val;
-    while (*pos != '\n' && pos < end) pos++;
-    *pos = '\0'; pos++;
-    add:;
-    HMAP_ADD(array_to_return, 0, arg, val);
-  }
-  return array_to_return;
+#define CONFIG_PARSER_PARSE(options_file, var_pointer_pair_hmap){\
+  void* _internal_variable_buff;\
+  FILE_READ(options_file, _internal_variable_buff);\
+  char *_internal_variable_pos = _internal_variable_buff, *_internal_variable_end = (char*)_internal_variable_buff + _internal_variable_len;\
+  while (_internal_variable_pos < _internal_variable_end){\
+    char *_internal_variable_arg, *_internal_variable_val;\
+    while ((*_internal_variable_pos == ' ' || *_internal_variable_pos == '\n' || *_internal_variable_pos == '\t' || *_internal_variable_pos == '\r') && _internal_variable_pos < _internal_variable_end) _internal_variable_pos++;\
+    if (*_internal_variable_pos == '#'){\
+      _internal_variable_pos++;\
+      while (*_internal_variable_pos != '\n' && _internal_variable_pos < _internal_variable_end) _internal_variable_pos++;\
+      continue;\
+    }\
+    if (_internal_variable_pos == _internal_variable_end) break;\
+    _internal_variable_arg = _internal_variable_pos;\
+    while (*_internal_variable_pos != '=' && *_internal_variable_pos != '\n' && _internal_variable_pos < _internal_variable_end) _internal_variable_pos++;\
+    if (_internal_variable_pos == _internal_variable_end || *_internal_variable_pos == '\n') {\
+      *_internal_variable_pos = '\0'; _internal_variable_pos++;\
+      _internal_variable_val = NULL;\
+      goto _internal_variable_CONFIG_PARSER_PARSE_1;\
+    }\
+    _internal_variable_val = _internal_variable_pos+1;\
+    while (*(_internal_variable_pos-1) == ' ' && _internal_variable_pos > _internal_variable_arg) _internal_variable_pos--;\
+    if (_internal_variable_pos == _internal_variable_arg) _internal_variable_arg = NULL;\
+    else *_internal_variable_pos = '\0';\
+    while (*_internal_variable_val == ' ' || *_internal_variable_val == '\t' && _internal_variable_val < _internal_variable_end) _internal_variable_val++;\
+    _internal_variable_pos = _internal_variable_val;\
+    while (*_internal_variable_pos != '\n' && _internal_variable_pos < _internal_variable_end) _internal_variable_pos++;\
+    *_internal_variable_pos = '\0'; _internal_variable_pos++;\
+    _internal_variable_CONFIG_PARSER_PARSE_1: HMAP_ADD(var_pointer_pair_hmap, HMAP_STRING(_internal_variable_arg), _internal_variable_arg, _internal_variable_val);\
+  }\
 }
 
 #ifdef __cplusplus

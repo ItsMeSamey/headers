@@ -8,9 +8,40 @@ extern "C" {
 #define VOID 0
 #define INT 1
 
-#define ARG_NEXT() ;
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
+#include "limited_dynamic_array.h"
 
-#define ARG_ADD(argname, var, consume)
+  // char** _internal_variable_scratch = var_pointer_pair_hmap[LDARRAY_SIZE(var_pointer_pair_hmap)];
+#define ARG_PARSER_PARSE(argc, argv, var_pointer_pair_hmap) {\
+  char *_internal_variable_buff;\
+  LDARRAY_MAKE(_internal_variable_buff);\
+  char *cur;\
+  char **array;\
+  DARRAY_MAKE(array);\
+  DARRAY_RESIZE(array, argc*2);\
+  size_t size = *(size_t*)DARRAY_SIZE(array);\
+  size_t pos = 0;\
+  while (pos < argc) {\
+    cur = argv[pos];\
+    if (cur[0] == '-') {\
+      while (*cur != '=' && *cur != '\0') cur++;\
+      if (cur[0] == '=') {\
+        char *prior = cur;\
+        while (*(prior-1) == ' ' || *(prior-1) == '\t' || *(prior-1) == '\n') prior--;\
+        *prior = '\0';\
+        cur++;\
+        while (*cur == ' ' || *cur == '\t' || *cur == '\n') cur++;\
+        array[size] = argv[pos];\
+        (size)++;\
+      }\
+    }\
+    array[size] = argv[pos];\
+    (size)++;\
+    pos++;\
+  }\
+}
 
 #else
 #undef UNDEFINE_ARG_PARSE
@@ -19,43 +50,6 @@ extern "C" {
 #undef STRING
 #undef ADD_ARG
 #endif
-
-
-
-
-
-#include <stddef.h>
-#include <stdlib.h>
-#include <string.h>
-#include "dynamic_array.h"
-
-inline __DARRAY(char**) __parse_arguments(const size_t argc, char** argv) {
-  char *cur;
-  char **array;
-  DARRAY_MAKE(char *, array);
-  DARRAY_RESIZE(cahr*, array, argc*2);
-  size_t *size = DARRAY_SIZE(array);
-  size_t pos = 0;
-  while (pos < argc) {
-    cur = argv[pos];
-    if (cur[0] == '-') {
-      while (*cur != '=' && *cur != '\0') cur++;
-      if (cur[0] == '=') {
-        char *prior = cur;
-        while (*(prior-1) == ' ' || *(prior-1) == '\t' || *(prior-1) == '\n') prior--;
-        *prior = '\0';
-        cur++;
-        while (*cur == ' ' || *cur == '\t' || *cur == '\n') cur++;
-        array[*size] = argv[pos];
-        (*size)++;
-      }
-    }
-    array[*size] = argv[pos];
-    (*size)++;
-    pos++;
-  }
-  return array;
-}
 
 #ifdef __cplusplus
 };
